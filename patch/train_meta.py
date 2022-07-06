@@ -181,10 +181,11 @@ class AdversarialMask:
 
         img_batch_applied = self.fxz_projector(img_batch, preds, adv_patch, do_aug=self.config.mask_aug)
 
-        n_embedders = len(self.embedders.items())
+        n_embedders = len(list(self.embedders.items()))
         print('n_embedders ', n_embedders)
         test_embedder_idx = random.choice(range(n_embedders))
-        test_embedder_name,test_embedder_model=self.embedders.items()[test_embedder_idx]
+        print('test_embedder_idx',test_embedder_idx)
+        test_embedder_name,test_embedder_model=list(self.embedders.items())[test_embedder_idx]
         print('test_embedder_name ',test_embedder_name)
 
         
@@ -195,8 +196,8 @@ class AdversarialMask:
                 patch_embs[embedder_name] = emb_model(img_batch_applied)
 
         #overall_loss=[]
-        meta_train_loss=self.loss_fn_v2(patch_embs,cls_id)
-        print('meta_train_loss',meta_train_loss)
+        meta_train_loss = self.loss_fn_v2(patch_embs, cls_id)
+        print('meta_train_loss', meta_train_loss)
 
         #overall_loss.append(meta_train_loss)
 
@@ -211,7 +212,8 @@ class AdversarialMask:
                 print('tr_loss ',tr_loss)
                 tr_loss_grad_adv=torch.autograd.grad(tr_loss,adv_patch,retain_graph=True)
                 #single step adv patch update by SGD
-                adv_patch_updated=torch.add(adv_patch,((-self.config.meta_lr)*tr_loss_grad_adv))
+
+                adv_patch_updated = torch.add(adv_patch, torch.mul(tr_loss_grad_adv[0], -self.config.meta_lr))
                 adv_patch_updated.data.clamp_(0, 1)
 
                 #Meta test
@@ -237,6 +239,7 @@ class AdversarialMask:
         loss=(total_loss,[total_meta_loss,tv_loss])
 
         return loss, [img_batch, adv_patch, img_batch_applied, patch_embs, tv_loss]
+
 
     def save_losses(self, epoch_length, train_loss, dist_loss, tv_loss):
         train_loss /= epoch_length
