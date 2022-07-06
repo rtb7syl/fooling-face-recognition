@@ -70,7 +70,8 @@ class BaseConfiguration:
         # Train dataset options
         self.is_real_person = False
         self.train_dataset_name = 'CASIA-WebFace_aligned'
-        self.train_img_dir = os.path.join('..','..', 'data', self.train_dataset_name)
+        self.train_img_dir = os.path.join('..', 'data', self.train_dataset_name)
+        #self.train_img_dir = os.path.join('..','..', 'data', self.train_dataset_name)
         self.train_number_of_people = 100
         self.celeb_lab = os.listdir(self.train_img_dir)[:self.train_number_of_people]
         self.celeb_lab_mapper = {i: lab for i, lab in enumerate(self.celeb_lab)}
@@ -146,7 +147,8 @@ class UniversalAttack(BaseConfiguration):
         # Test dataset options
         self.test_num_of_images_for_emb = 5
         self.test_dataset_names = ['CASIA-WebFace_aligned']
-        self.test_img_dir = {name: os.path.join('..', '..','data', name) for name in self.test_dataset_names}
+        #self.test_img_dir = {name: os.path.join('..', '..','data', name) for name in self.test_dataset_names}
+        self.test_img_dir = {name: os.path.join('..','data', name) for name in self.test_dataset_names}
         self.test_number_of_people = 200
         self.test_celeb_lab = {}
         for dataset_name, img_dir in self.test_img_dir.items():

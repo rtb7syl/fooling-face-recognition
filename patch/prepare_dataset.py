@@ -12,6 +12,8 @@ from skimage import transform as trans
 from pathlib import Path
 import torch
 
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -43,4 +45,4 @@ def face_crop_raw_images_batched(input_path, output_path):
                     cv2.imwrite(os.path.join(output_path, folder_name, batched_images_path[j]), cut)
                     
                     
-face_crop_raw_images_batched('../../data/CASIA-WebFace', '../../data/CASIA-WebFace_aligned')
+face_crop_raw_images_batched('../data/CASIA-WebFace', '../data/CASIA-WebFace_aligned')
