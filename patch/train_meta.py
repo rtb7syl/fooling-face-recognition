@@ -176,7 +176,6 @@ class AdversarialMask:
 
         adv_patch = adv_patch_cpu.to(device)
 
-
         preds = self.location_extractor(img_batch)
 
         img_batch_applied = self.fxz_projector(img_batch, preds, adv_patch, do_aug=self.config.mask_aug)
