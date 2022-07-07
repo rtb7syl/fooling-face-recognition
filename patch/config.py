@@ -70,7 +70,7 @@ class BaseConfiguration:
         # Train dataset options
         self.is_real_person = False
         self.train_dataset_name = 'CASIA-WebFace_aligned'
-        self.train_img_dir = os.path.join('..', 'data', self.train_dataset_name)
+        self.train_img_dir = os.path.join('/home','lect0083','datasets', self.train_dataset_name)
         #self.train_img_dir = os.path.join('..','..', 'data', self.train_dataset_name)
         self.train_number_of_people = 100
         self.celeb_lab = os.listdir(self.train_img_dir)[:self.train_number_of_people]
@@ -89,6 +89,7 @@ class BaseConfiguration:
         self.initial_patch = 'white'  # body, white, random, stripes, l_stripes
         self.epochs = 100
         self.meta_lr=1e-3
+        self.meta_momentum=0.9
         self.start_learning_rate = 1e-2
         self.es_patience = 7
         self.sc_patience = 2
@@ -103,7 +104,7 @@ class BaseConfiguration:
 
         # Embedder options
         #self.train_embedder_names = ['resnet100_arcface', 'resnet100_cosface', 'resnet100_magface']
-        self.train_embedder_names = ['resnet100_arcface','resnet18_arcface']
+        self.train_embedder_names = ['resnet100_arcface','resnet100_cosface']
         self.test_embedder_names = ['resnet100_arcface', 'resnet50_arcface', 'resnet34_arcface', 'resnet18_arcface',
                                     'resnet100_cosface', 'resnet50_cosface', 'resnet34_cosface', 'resnet18_cosface',
                                     'resnet100_magface']
@@ -148,7 +149,7 @@ class UniversalAttack(BaseConfiguration):
         self.test_num_of_images_for_emb = 5
         self.test_dataset_names = ['CASIA-WebFace_aligned']
         #self.test_img_dir = {name: os.path.join('..', '..','data', name) for name in self.test_dataset_names}
-        self.test_img_dir = {name: os.path.join('..','data', name) for name in self.test_dataset_names}
+        self.test_img_dir = {name: os.path.join('/home','lect0083','datasets', name) for name in self.test_dataset_names}
         self.test_number_of_people = 200
         self.test_celeb_lab = {}
         for dataset_name, img_dir in self.test_img_dir.items():

@@ -23,7 +23,7 @@ import losses
 from config import patch_config_types
 from nn_modules import LandmarkExtractor, FaceXZooProjector, TotalVariation
 from utils import load_embedder, EarlyStopping, get_patch
-
+from optimizers import SimpleSGD
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -59,6 +59,9 @@ class AdversarialMask:
         self.fxz_projector = FaceXZooProjector(device, self.config.img_size, self.config.patch_size).to(device)
         self.total_variation = TotalVariation(device).to(device)
         self.dist_loss = losses.get_loss(self.config)
+
+        self.meta_optimizer=SimpleSGD(lr=self.config.meta_lr,momentum=self.config.meta_momentum,nesterov=True)
+
 
         self.train_losses_epoch = []
         self.train_losses_iter = []
@@ -209,10 +212,11 @@ class AdversarialMask:
                 patch_emb=patch_embs[embedder_name]
                 tr_loss=self.loss_fn_single_v2(patch_emb,embedder_name,cls_id)
                 #print('tr_loss ',tr_loss)
-                tr_loss_grad_adv=torch.autograd.grad(tr_loss,adv_patch,retain_graph=True)
-                #single step adv patch update by SGD
+                tr_loss_grad_adv=torch.autograd.grad(tr_loss,adv_patch,retain_graph=True)[0]
 
-                adv_patch_updated = torch.add(adv_patch, torch.mul(tr_loss_grad_adv[0], -self.config.meta_lr))
+                #single step adv patch update by SGD
+                adv_patch_updated=self.meta_optimizer.step(adv_patch,tr_loss_grad_adv)
+                #adv_patch_updated = torch.add(adv_patch, torch.mul(tr_loss_grad_adv, -self.config.meta_lr))
                 adv_patch_updated.data.clamp_(0, 1)
 
                 #Meta test
