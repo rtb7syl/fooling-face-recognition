@@ -188,7 +188,7 @@ class AdversarialMask:
         test_embedder_name,test_embedder_model=list(self.embedders.items())[test_embedder_idx]
         #print('test_embedder_name ',test_embedder_name)
 
-        
+
         patch_embs = {}
         for i, (embedder_name, emb_model) in enumerate(self.embedders.items()):
             if i!=test_embedder_idx:
@@ -197,7 +197,7 @@ class AdversarialMask:
 
         #overall_loss=[]
         meta_train_loss = self.loss_fn_v2(patch_embs, cls_id)
-        #print('meta_train_loss', meta_train_loss)
+        print('meta_train_loss', meta_train_loss)
 
         #overall_loss.append(meta_train_loss)
 
@@ -224,12 +224,12 @@ class AdversarialMask:
                 meta_test_losses.append(te_loss)
 
         meta_test_loss=torch.mean(torch.stack(meta_test_losses))
-        #print('meta_test_loss',meta_test_loss)
+        print('meta_test_loss',meta_test_loss)
 
         #overall_loss.append(meta_test_loss)
 
-        total_meta_loss = self.config.dist_weight * torch.add(meta_train_loss,meta_test_loss)
-        #print('total_meta_loss',total_meta_loss)
+        total_meta_loss = self.config.dist_weight * torch.mean(torch.stack([meta_train_loss,meta_test_loss]))
+        print('total_meta_loss',total_meta_loss)
 
         tv_loss = self.total_variation(adv_patch)
         tv_loss = self.config.tv_weight * tv_loss
