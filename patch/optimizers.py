@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 
-class SimpleSGD():
+class SimpleSGD:
     def __init__(self, lr=0.001, momentum=0, dampening=0,
                  weight_decay=0, nesterov=False):
 
