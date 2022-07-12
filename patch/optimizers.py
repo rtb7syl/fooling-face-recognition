@@ -62,7 +62,7 @@ class Adam:
             self.epsilon = epsilon
             self.momentum = None
             self.rms = None
-            self.t = 1
+            self.iteration = 1
 
     def step(self, objective, gradient):
         if self.momentum is None:
@@ -73,8 +73,10 @@ class Adam:
         self.momentum = torch.add(torch.mul(self.beta1, self.momentum), torch.mul(1 - self.beta1, gradient))
         self.rms = torch.add(torch.mul(self.beta2, self.rms), torch.mul(1 - self.beta2, torch.mul(gradient, gradient)))
 
-        momentum_corr = torch.div(self.momentum, 1 - self.beta1**self.t)
-        rms_corr = torch.div(self.rms, 1 - self.beta2**self.t)
+        momentum_corr = torch.div(self.momentum, 1 - self.beta1**self.iteration)
+        rms_corr = torch.div(self.rms, 1 - self.beta2**self.iteration)
+
+        self.iteration += 1
 
         return \
             objective - torch.mul(self.alpha, torch.div(momentum_corr, torch.add(torch.sqrt(rms_corr), self.epsilon)))
