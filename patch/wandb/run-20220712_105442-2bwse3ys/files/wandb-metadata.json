@@ -1,0 +1,24 @@
+{
+    "os": "Linux-3.10.0-1160.71.1.el7.x86_64-x86_64-with-glibc2.10",
+    "python": "3.8.2",
+    "heartbeatAt": "2022-07-12T08:54:45.504764",
+    "startedAt": "2022-07-12T08:54:42.783647",
+    "docker": null,
+    "gpu": "Tesla V100-SXM2-16GB",
+    "gpu_count": 1,
+    "cpu_count": 48,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "train_meta.py",
+    "codePath": "patch/train_meta.py",
+    "git": {
+        "remote": "https://github.com/rtb7syl/fooling-face-recognition.git",
+        "commit": "b2514600d187d1b37b0f70226eadb8252905b5f6"
+    },
+    "email": null,
+    "root": "/rwthfs/rz/cluster/home/ca550013/Projects/fooling-face-recognition",
+    "host": "nrg03.hpc.itc.rwth-aachen.de",
+    "username": "ca550013",
+    "executable": "/home/ca550013/miniconda3/envs/tf_gpu/bin/python"
+}

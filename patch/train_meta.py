@@ -25,6 +25,8 @@ from nn_modules import LandmarkExtractor, FaceXZooProjector, TotalVariation
 from utils import load_embedder, EarlyStopping, get_patch
 from optimizers import SimpleSGD
 
+import wandb
+
 import warnings
 warnings.simplefilter('ignore', UserWarning)
 
@@ -48,6 +50,7 @@ def set_random_seed(seed_value):
 class AdversarialMask:
     def __init__(self, config):
         self.config = config
+        wandb.init(project="adv-faces", entity="rtb7syl",config=config)
         set_random_seed(seed_value=self.config.seed)
 
         self.train_no_aug_loader, self.train_loader = utils.get_train_loaders(self.config)
@@ -56,8 +59,14 @@ class AdversarialMask:
 
         face_landmark_detector = utils.get_landmark_detector(self.config, device)
         self.location_extractor = LandmarkExtractor(device, face_landmark_detector, self.config.img_size).to(device)
+        wandb.watch(self.location_extractor)
+
         self.fxz_projector = FaceXZooProjector(device, self.config.img_size, self.config.patch_size).to(device)
+        wandb.watch(self.fxz_projector)
+
         self.total_variation = TotalVariation(device).to(device)
+        wandb.watch(self.total_variation)
+
         self.dist_loss = losses.get_loss(self.config)
 
         self.meta_optimizer=SimpleSGD(lr=self.config.meta_lr,momentum=self.config.meta_momentum,nesterov=True)
@@ -88,6 +97,9 @@ class AdversarialMask:
         Path(self.config.current_dir + '/losses').mkdir(parents=True, exist_ok=True)
 
     def train(self):
+
+        
+
         adv_patch_cpu = utils.get_patch(self.config)
         optimizer = optim.Adam([adv_patch_cpu], lr=self.config.start_learning_rate, amsgrad=True)
         scheduler = self.config.scheduler_factory(optimizer)
@@ -199,7 +211,7 @@ class AdversarialMask:
 
         #overall_loss=[]
         meta_train_loss = self.loss_fn_v2(patch_embs, cls_id)
-        print('meta_train_loss', meta_train_loss)
+        #print('meta_train_loss', meta_train_loss)
 
         #overall_loss.append(meta_train_loss)
 
@@ -215,6 +227,7 @@ class AdversarialMask:
                 tr_loss_grad_adv=torch.autograd.grad(tr_loss,adv_patch,retain_graph=True)[0]
 
                 #single step adv patch update by SGD
+
                 adv_patch_updated=self.meta_optimizer.step(adv_patch,tr_loss_grad_adv)
                 #adv_patch_updated = torch.add(adv_patch, torch.mul(tr_loss_grad_adv, -self.config.meta_lr))
                 adv_patch_updated.data.clamp_(0, 1)
@@ -227,18 +240,22 @@ class AdversarialMask:
                 meta_test_losses.append(te_loss)
 
         meta_test_loss=torch.mean(torch.stack(meta_test_losses))
-        print('meta_test_loss',meta_test_loss)
+        #print('meta_test_loss',meta_test_loss)
 
         #overall_loss.append(meta_test_loss)
 
         total_meta_loss = self.config.dist_weight * torch.mean(torch.stack([meta_train_loss,meta_test_loss]))
-        print('total_meta_loss',total_meta_loss)
+        #print('total_meta_loss',total_meta_loss)
 
         tv_loss = self.total_variation(adv_patch)
         tv_loss = self.config.tv_weight * tv_loss
 
         total_loss = total_meta_loss + tv_loss
         loss=(total_loss,[total_meta_loss,tv_loss])
+
+        loss_stats = dict(total_loss=total_loss,tv_loss=tv_loss,meta_loss=total_meta_loss,meta_train_loss=meta_train_loss,meta_test_loss=meta_test_loss)
+
+        wandb.log(loss_stats)
 
         return loss, [img_batch, adv_patch, img_batch_applied, patch_embs, tv_loss]
 

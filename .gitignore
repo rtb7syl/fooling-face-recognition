@@ -1,3 +1,6 @@
 *.pth
 patch/experiments/*
 data/
+cluster_out/*
+cluster_err/*
+*.pyc

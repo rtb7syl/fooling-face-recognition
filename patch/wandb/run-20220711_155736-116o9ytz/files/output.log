@@ -1,0 +1,12 @@
+{'lr': 0.001, 'momentum': 0.9, 'weight_decay': 0, 'nesterov': True, 'dampening': 0}
+Calculating persons embeddings without mask...
+
+
+
+
+
+100% 125/125 [00:13<00:00,  9.24it/s]
+100% 125/125 [00:01<00:00, 75.70it/s]
+100% 125/125 [00:02<00:00, 53.66it/s]
+
+100% 125/125 [00:02<00:00, 52.80it/s]

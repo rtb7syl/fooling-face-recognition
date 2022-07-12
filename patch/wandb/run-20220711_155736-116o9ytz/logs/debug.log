@@ -1,0 +1,132 @@
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_setup.py:_flush():76] Configure stats pid to 102540
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_setup.py:_flush():76] Loading settings from /home/ca550013/.config/wandb/settings
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_setup.py:_flush():76] Loading settings from /rwthfs/rz/cluster/home/ca550013/Projects/fooling-face-recognition/patch/wandb/settings
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'patch/train_meta.py', 'program': 'train_meta.py'}
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_init.py:_log_setup():461] Logging user logs to /rwthfs/rz/cluster/home/ca550013/Projects/fooling-face-recognition/patch/wandb/run-20220711_155736-116o9ytz/logs/debug.log
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_init.py:_log_setup():462] Logging internal logs to /rwthfs/rz/cluster/home/ca550013/Projects/fooling-face-recognition/patch/wandb/run-20220711_155736-116o9ytz/logs/debug-internal.log
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_init.py:init():495] calling init triggers
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_init.py:init():498] wandb.init called with sweep_config: {}
+config: {'seed': 42, 'patch_name': 'universal', 'is_real_person': False, 'train_dataset_name': 'CASIA-WebFace_aligned', 'train_img_dir': '/home/lect0083/datasets/CASIA-WebFace_aligned', 'train_number_of_people': 100, 'celeb_lab': ['0811967', '0077074', '1016334', '1939267', '0031078', '6189742', '0830317', '1683768', '1471036', '0829134', '3236759', '0726773', '2212757', '0001675', '1393246', '2711305', '0051621', '1472917', '0170422', '0525659', '0422205', '0651159', '1098493', '0258200', '0528761', '1936361', '0571537', '1137209', '1219010', '0155150', '0655124', '1469820', '1943692', '0662160', '0161133', '3819615', '0229422', '1035503', '0000796', '0005073', '1640523', '1955540', '0262968', '3802966', '3046990', '3349100', '0004982', '0685277', '0462407', '2924523', '1355362', '2210869', '1898746', '2313103', '2642892', '3554468', '2391440', '1318660', '2953628', '0864332', '0660371', '1310016', '0553648', '1018488', '2104193', '1456970', '0881038', '0935616', '1393354', '0185104', '1752714', '0545165', '0681504', '2648030', '0689187', '0892383', '0287182', '1531832', '2336967', '0009716', '2860645', '1864458', '0507659', '1382356', '4221139', '0000513', '0726630', '0000121', '0003457', '1218757', '0160621', '0000301', '0320788', '0897583', '0631788', '0004426', '2473076', '2322406', '1767820', '0005044'], 'celeb_lab_mapper': {0: '0811967', 1: '0077074', 2: '1016334', 3: '1939267', 4: '0031078', 5: '6189742', 6: '0830317', 7: '1683768', 8: '1471036', 9: '0829134', 10: '3236759', 11: '0726773', 12: '2212757', 13: '0001675', 14: '1393246', 15: '2711305', 16: '0051621', 17: '1472917', 18: '0170422', 19: '0525659', 20: '0422205', 21: '0651159', 22: '1098493', 23: '0258200', 24: '0528761', 25: '1936361', 26: '0571537', 27: '1137209', 28: '1219010', 29: '0155150', 30: '0655124', 31: '1469820', 32: '1943692', 33: '0662160', 34: '0161133', 35: '3819615', 36: '0229422', 37: '1035503', 38: '0000796', 39: '0005073', 40: '1640523', 41: '1955540', 42: '0262968', 43: '3802966', 44: '3046990', 45: '3349100', 46: '0004982', 47: '0685277', 48: '0462407', 49: '2924523', 50: '1355362', 51: '2210869', 52: '1898746', 53: '2313103', 54: '2642892', 55: '3554468', 56: '2391440', 57: '1318660', 58: '2953628', 59: '0864332', 60: '0660371', 61: '1310016', 62: '0553648', 63: '1018488', 64: '2104193', 65: '1456970', 66: '0881038', 67: '0935616', 68: '1393354', 69: '0185104', 70: '1752714', 71: '0545165', 72: '0681504', 73: '2648030', 74: '0689187', 75: '0892383', 76: '0287182', 77: '1531832', 78: '2336967', 79: '0009716', 80: '2860645', 81: '1864458', 82: '0507659', 83: '1382356', 84: '4221139', 85: '0000513', 86: '0726630', 87: '0000121', 88: '0003457', 89: '1218757', 90: '0160621', 91: '0000301', 92: '0320788', 93: '0897583', 94: '0631788', 95: '0004426', 96: '2473076', 97: '2322406', 98: '1767820', 99: '0005044'}, 'num_of_train_images': 5, 'shuffle': True, 'img_size': (112, 112), 'train_batch_size': 4, 'test_batch_size': 32, 'magnification_ratio': 35, 'mask_aug': True, 'patch_size': (112, 112), 'initial_patch': 'white', 'epochs': 100, 'meta_optimizer': 'sgd', 'meta_lr': 0.001, 'meta_momentum': 0.9, 'start_learning_rate': 0.01, 'es_patience': 7, 'sc_patience': 2, 'sc_min_lr': 1e-06, 'scheduler_factory': <function BaseConfiguration.__init__.<locals>.<lambda> at 0x2adce8b9aee0>, 'landmark_detector_type': 'mobilefacenet', 'train_embedder_names': ['resnet34_arcface', 'resnet34_cosface', 'resnet50_arcface', 'resnet50_cosface'], 'test_embedder_names': ['resnet100_arcface', 'resnet100_cosface', 'resnet50_arcface', 'resnet34_arcface', 'resnet50_cosface', 'resnet34_cosface', 'resnet18_arcface', 'resnet18_cosface'], 'dist_loss_type': 'cossim', 'dist_weight': 1, 'tv_weight': 0.1, 'masks_path': '../data/masks', 'random_mask_path': '../data/masks/random.png', 'blue_mask_path': '../data/masks/blue.png', 'black_mask_path': '../data/masks/black.png', 'white_mask_path': '../data/masks/white.png', 'face1_mask_path': '../data/masks/face1.png', 'face3_mask_path': '../data/masks/face3.png', 'current_dir': 'experiments/July/11-07-2022_15-57-36_28667646', 'test_num_of_images_for_emb': 5, 'test_dataset_names': ['CASIA-WebFace_aligned'], 'test_img_dir': {'CASIA-WebFace_aligned': '/home/lect0083/datasets/CASIA-WebFace_aligned'}, 'test_number_of_people': 200, 'test_celeb_lab': {'CASIA-WebFace_aligned': ['5937337', '5664432', '2598733', '0001139', '3312554', '2526306', '1732403', '2069547', '1568881', '0001668', '1675949', '0665822', '0725434', '1017951', '0773884', '0000759', '1991503', '0654104', '0005203', '2062561', '0325221', '2178959', '0932992', '1187903', '0731346', '2358143', '0003633', '0001912', '0716257', '2128467', '0382110', '2467428', '4568815', '6074154', '1095720', '1421588', '2434990', '4203692', '0569458', '0000102', '0151540', '1699370', '0572721', '3733589', '2452327', '0345740', '0158846', '0347957', '1664076', '0291404', '2885819', '0002546', '2251731', '1096977', '1404824', '4990126', '3041468', '0063440', '0255309', '0855103', '4336694', '0272479', '2023000', '1423270', '1467976', '0021112', '4194830', '4321164', '2316016', '0005494', '0794896', '0654648', '0518579', '0005085', '1631098', '0868219', '0427888', '1312575', '0694336', '0646241', '1464837', '0737318', '2459822', '0553047', '1157358', '0610298', '1057116', '0835725', '3031251', '2143966', '2957438', '0004830', '0298104', '3398631', '0503567', '0221983', '1004211', '0001412', '0047248', '0656188', '3871681', '0756089', '0145194', '0001406', '0000633', '1435348', '0971133', '1813440', '0001187', '1708957', '2568364', '0832906', '0346550', '0001107', '4733211', '2142796', '0318703', '0860947', '2079710', '0084370', '0000868', '2257466', '0356003', '0001208', '2369292', '0001790', '2254914', '1367048', '0005430', '0674231', '0005553', '3103226', '0364280', '2157624', '0069109', '2027650', '0499791', '0819660', '3794974', '1074374', '0031639', '0005490', '0689708', '3499499', '0525572', '1666212', '1075955', '2440492', '2471798', '1614819', '0001641', '2720650', '2123271', '0553436', '2038226', '1311329', '0413168', '1136546', '0191412', '0918424', '0002773', '2002649', '1955294', '0000363', '0001556', '1319062', '4858020', '3087728', '0001484', '0002332', '0573618', '2795679', '1023097', '2338525', '0584206', '1835900', '2024927', '0080049', '0611889', '0000420', '0631413', '2167048', '1792091', '1382563', '1047343', '2761710', '0522324', '1151096', '0794687', '1832801', '0495201', '1975228', '0004827', '0570771', '1040365', '0001622', '1808008', '0493311', '3568265', '0236564']}, 'test_celeb_lab_mapper': {'CASIA-WebFace_aligned': {0: '5937337', 1: '5664432', 2: '2598733', 3: '0001139', 4: '3312554', 5: '2526306', 6: '1732403', 7: '2069547', 8: '1568881', 9: '0001668', 10: '1675949', 11: '0665822', 12: '0725434', 13: '1017951', 14: '0773884', 15: '0000759', 16: '1991503', 17: '0654104', 18: '0005203', 19: '2062561', 20: '0325221', 21: '2178959', 22: '0932992', 23: '1187903', 24: '0731346', 25: '2358143', 26: '0003633', 27: '0001912', 28: '0716257', 29: '2128467', 30: '0382110', 31: '2467428', 32: '4568815', 33: '6074154', 34: '1095720', 35: '1421588', 36: '2434990', 37: '4203692', 38: '0569458', 39: '0000102', 40: '0151540', 41: '1699370', 42: '0572721', 43: '3733589', 44: '2452327', 45: '0345740', 46: '0158846', 47: '0347957', 48: '1664076', 49: '0291404', 50: '2885819', 51: '0002546', 52: '2251731', 53: '1096977', 54: '1404824', 55: '4990126', 56: '3041468', 57: '0063440', 58: '0255309', 59: '0855103', 60: '4336694', 61: '0272479', 62: '2023000', 63: '1423270', 64: '1467976', 65: '0021112', 66: '4194830', 67: '4321164', 68: '2316016', 69: '0005494', 70: '0794896', 71: '0654648', 72: '0518579', 73: '0005085', 74: '1631098', 75: '0868219', 76: '0427888', 77: '1312575', 78: '0694336', 79: '0646241', 80: '1464837', 81: '0737318', 82: '2459822', 83: '0553047', 84: '1157358', 85: '0610298', 86: '1057116', 87: '0835725', 88: '3031251', 89: '2143966', 90: '2957438', 91: '0004830', 92: '0298104', 93: '3398631', 94: '0503567', 95: '0221983', 96: '1004211', 97: '0001412', 98: '0047248', 99: '0656188', 100: '3871681', 101: '0756089', 102: '0145194', 103: '0001406', 104: '0000633', 105: '1435348', 106: '0971133', 107: '1813440', 108: '0001187', 109: '1708957', 110: '2568364', 111: '0832906', 112: '0346550', 113: '0001107', 114: '4733211', 115: '2142796', 116: '0318703', 117: '0860947', 118: '2079710', 119: '0084370', 120: '0000868', 121: '2257466', 122: '0356003', 123: '0001208', 124: '2369292', 125: '0001790', 126: '2254914', 127: '1367048', 128: '0005430', 129: '0674231', 130: '0005553', 131: '3103226', 132: '0364280', 133: '2157624', 134: '0069109', 135: '2027650', 136: '0499791', 137: '0819660', 138: '3794974', 139: '1074374', 140: '0031639', 141: '0005490', 142: '0689708', 143: '3499499', 144: '0525572', 145: '1666212', 146: '1075955', 147: '2440492', 148: '2471798', 149: '1614819', 150: '0001641', 151: '2720650', 152: '2123271', 153: '0553436', 154: '2038226', 155: '1311329', 156: '0413168', 157: '1136546', 158: '0191412', 159: '0918424', 160: '0002773', 161: '2002649', 162: '1955294', 163: '0000363', 164: '0001556', 165: '1319062', 166: '4858020', 167: '3087728', 168: '0001484', 169: '0002332', 170: '0573618', 171: '2795679', 172: '1023097', 173: '2338525', 174: '0584206', 175: '1835900', 176: '2024927', 177: '0080049', 178: '0611889', 179: '0000420', 180: '0631413', 181: '2167048', 182: '1792091', 183: '1382563', 184: '1047343', 185: '2761710', 186: '0522324', 187: '1151096', 188: '0794687', 189: '1832801', 190: '0495201', 191: '1975228', 192: '0004827', 193: '0570771', 194: '1040365', 195: '0001622', 196: '1808008', 197: '0493311', 198: '3568265', 199: '0236564'}}}
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [wandb_init.py:init():548] starting backend
+2022-07-11 15:57:36,812 INFO    MainThread:102540 [backend.py:_multiprocessing_setup():97] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2022-07-11 15:57:36,854 INFO    MainThread:102540 [backend.py:ensure_launched():217] starting backend process...
+2022-07-11 15:57:36,869 INFO    MainThread:102540 [backend.py:ensure_launched():222] started backend process with pid: 103464
+2022-07-11 15:57:36,871 INFO    MainThread:102540 [wandb_init.py:init():558] backend started and connected
+2022-07-11 15:57:36,882 INFO    MainThread:102540 [wandb_init.py:init():634] updated telemetry
+2022-07-11 15:57:36,927 INFO    MainThread:102540 [wandb_init.py:init():665] communicating run to backend with 30 second timeout
+2022-07-11 15:57:39,308 INFO    MainThread:102540 [wandb_run.py:_on_init():1919] communicating current version
+2022-07-11 15:57:39,362 INFO    MainThread:102540 [wandb_run.py:_on_init():1923] got version response 
+2022-07-11 15:57:39,362 INFO    MainThread:102540 [wandb_init.py:init():700] starting run threads in backend
+2022-07-11 15:57:44,375 INFO    MainThread:102540 [wandb_run.py:_console_start():1893] atexit reg
+2022-07-11 15:57:44,377 INFO    MainThread:102540 [wandb_run.py:_redirect():1766] redirect: SettingsConsole.REDIRECT
+2022-07-11 15:57:44,378 INFO    MainThread:102540 [wandb_run.py:_redirect():1771] Redirecting console.
+2022-07-11 15:57:44,380 INFO    MainThread:102540 [wandb_run.py:_redirect():1827] Redirects installed.
+2022-07-11 15:57:44,380 INFO    MainThread:102540 [wandb_init.py:init():732] run started, returning control to user process
+2022-07-11 15:58:34,450 INFO    MainThread:102540 [wandb_watch.py:watch():47] Watching
+2022-07-11 15:58:34,454 INFO    MainThread:102540 [wandb_run.py:_atexit_cleanup():1862] got exitcode: 1
+2022-07-11 15:58:34,456 INFO    MainThread:102540 [wandb_run.py:_restore():1834] restore
+2022-07-11 15:58:36,980 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 1
+}
+pusher_stats {
+  uploaded_bytes: 817
+  total_bytes: 817
+}
+
+2022-07-11 15:58:37,256 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 1
+}
+pusher_stats {
+  uploaded_bytes: 817
+  total_bytes: 817
+}
+
+2022-07-11 15:58:37,762 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 5
+}
+pusher_stats {
+  uploaded_bytes: 817
+  total_bytes: 28685
+}
+
+2022-07-11 15:58:37,864 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 817
+  total_bytes: 28712
+}
+
+2022-07-11 15:58:37,965 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 28397
+  total_bytes: 28712
+}
+
+2022-07-11 15:58:38,067 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 28712
+  total_bytes: 28712
+}
+
+2022-07-11 15:58:38,168 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 28712
+  total_bytes: 28712
+}
+
+2022-07-11 15:58:38,270 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 28712
+  total_bytes: 28712
+}
+
+2022-07-11 15:58:38,372 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 28712
+  total_bytes: 28712
+}
+
+2022-07-11 15:58:38,473 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 28712
+  total_bytes: 28712
+}
+
+2022-07-11 15:58:39,117 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 28712
+  total_bytes: 28712
+}
+
+2022-07-11 15:58:39,674 INFO    MainThread:102540 [wandb_run.py:_on_finish():1991] got exit ret: done: true
+exit_result {
+}
+file_counts {
+  wandb_count: 6
+}
+pusher_stats {
+  uploaded_bytes: 28712
+  total_bytes: 28712
+}
+local_info {
+}
+
+2022-07-11 15:58:40,856 INFO    MainThread:102540 [wandb_run.py:_footer_history_summary_info():3099] rendering history
+2022-07-11 15:58:40,856 INFO    MainThread:102540 [wandb_run.py:_footer_history_summary_info():3131] rendering summary
+2022-07-11 15:58:40,862 INFO    MainThread:102540 [wandb_run.py:_footer_sync_info():3055] logging synced files

@@ -88,6 +88,7 @@ class BaseConfiguration:
         self.patch_size = (112, 112)  # height, width
         self.initial_patch = 'white'  # body, white, random, stripes, l_stripes
         self.epochs = 100
+        self.meta_optimizer='sgd'
         self.meta_lr=1e-3
         self.meta_momentum=0.9
         self.start_learning_rate = 1e-2
@@ -103,11 +104,9 @@ class BaseConfiguration:
         self.landmark_detector_type = 'mobilefacenet'  # face_alignment, mobilefacenet
 
         # Embedder options
-        #self.train_embedder_names = ['resnet100_arcface', 'resnet100_cosface', 'resnet100_magface']
-        self.train_embedder_names = ['resnet100_arcface','resnet100_cosface']
-        self.test_embedder_names = ['resnet100_arcface', 'resnet50_arcface', 'resnet34_arcface', 'resnet18_arcface',
-                                    'resnet100_cosface', 'resnet50_cosface', 'resnet34_cosface', 'resnet18_cosface',
-                                    'resnet100_magface']
+        #self.train_embedder_names = ['resnet100_arcface', 'resnet100_cosface']
+        self.train_embedder_names = ['resnet100_arcface','resnet100_cosface','resnet18_cosface','resnet18_arcface']
+        self.test_embedder_names = ['resnet100_arcface','resnet100_cosface','resnet18_arcface','resnet18_cosface']
 
 
         # Loss options

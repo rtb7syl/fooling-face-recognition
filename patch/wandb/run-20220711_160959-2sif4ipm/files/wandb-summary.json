@@ -1,0 +1,1 @@
+{"total_loss": 0.5215234160423279, "tv_loss": 0.022370120510458946, "meta_loss": 0.4991532862186432, "meta_train_loss": 0.5046324729919434, "meta_test_loss": 0.493674099445343, "_timestamp": 1657555969, "_runtime": 7370, "_step": 6874, "_wandb": {"runtime": 7371}}
