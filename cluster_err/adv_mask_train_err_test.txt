@@ -1,0 +1,20 @@
+/home/ca550013/miniconda3/envs/tf_gpu/lib/python3.8/site-packages/skimage/io/manage_plugins.py:23: UserWarning: Your installed pillow version is < 8.1.2. Several security issues (CVE-2021-27921, CVE-2021-25290, CVE-2021-25291, CVE-2021-25293, and more) have been fixed in pillow 8.1.2 or higher. We recommend to upgrade this library.
+  from .collection import imread_collection_wrapper
+Traceback (most recent call last):
+  File "train_meta.py", line 281, in <module>
+    main()
+  File "train_meta.py", line 275, in main
+    adv_mask = AdversarialMask(config)
+  File "train_meta.py", line 59, in __init__
+    self.fxz_projector = FaceXZooProjector(device, self.config.img_size, self.config.patch_size).to(device)
+  File "/rwthfs/rz/cluster/home/ca550013/Projects/fooling-face-recognition/patch/nn_modules.py", line 45, in __init__
+    self.prn = PRN('../prnet/prnet.pth', device)
+  File "/rwthfs/rz/cluster/home/ca550013/Projects/fooling-face-recognition/patch/nn_modules.py", line 232, in __init__
+    self.net.load_state_dict(torch.load(model_path))
+  File "/home/ca550013/miniconda3/envs/tf_gpu/lib/python3.8/site-packages/torch/serialization.py", line 699, in load
+    with _open_file_like(f, 'rb') as opened_file:
+  File "/home/ca550013/miniconda3/envs/tf_gpu/lib/python3.8/site-packages/torch/serialization.py", line 231, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/home/ca550013/miniconda3/envs/tf_gpu/lib/python3.8/site-packages/torch/serialization.py", line 212, in __init__
+    super(_open_file, self).__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: '../prnet/prnet.pth'
