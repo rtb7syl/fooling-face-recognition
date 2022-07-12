@@ -23,6 +23,7 @@ import losses
 from config import patch_config_types
 from nn_modules import LandmarkExtractor, FaceXZooProjector, TotalVariation
 from utils import load_embedder, EarlyStopping, get_patch
+
 from optimizers import SimpleSGD
 
 import warnings
@@ -95,12 +96,14 @@ class AdversarialMask:
         early_stop = EarlyStopping(current_dir=self.config.current_dir, patience=self.config.es_patience,
                                    init_patch=adv_patch_cpu)
         epoch_length = len(self.train_loader)
+
         for epoch in range(self.config.epochs):
             train_loss = 0.0
             dist_loss = 0.0
             tv_loss = 0.0
             progress_bar = tqdm(enumerate(self.train_loader), desc=f'Epoch {epoch}', total=epoch_length)
             prog_bar_desc = 'train-loss: {:.6}, dist-loss: {:.6}, tv-loss: {:.6}, lr: {:.6}'
+
             for i_batch, (img_batch, _, cls_id) in progress_bar:
                 (b_loss, sep_loss), vars = self.forward_step(img_batch, adv_patch_cpu, cls_id)
 
@@ -212,11 +215,22 @@ class AdversarialMask:
                 patch_emb = patch_embs[embedder_name]
                 tr_loss = self.loss_fn_single_v2(patch_emb, embedder_name, cls_id)
                 # print('tr_loss ',tr_loss)
+                
+                # dev
                 tr_loss_grad_adv = torch.autograd.grad(tr_loss, adv_patch, retain_graph=True)[0]
 
                 # single step adv patch update by SGD
                 adv_patch_updated = self.meta_optimizer.step(adv_patch, tr_loss_grad_adv)
                 # adv_patch_updated = torch.add(adv_patch, torch.mul(tr_loss_grad_adv, -self.config.meta_lr))
+
+                # WIP
+                '''
+                tr_loss_grad_adv = torch.autograd.grad(tr_loss, adv_patch, retain_graph=True)
+
+                # single step adv patch update by SGD
+                adv_patch_updated = torch.add(adv_patch, torch.mul(tr_loss_grad_adv[0], -self.config.meta_lr))
+                '''
+                
                 adv_patch_updated.data.clamp_(0, 1)
 
                 # Meta test
@@ -233,6 +247,7 @@ class AdversarialMask:
         # overall_loss.append(meta_test_loss)
 
         total_meta_loss = self.config.dist_weight * torch.mean(torch.stack([meta_train_loss, meta_test_loss]))
+
         print('total_meta_loss', total_meta_loss)
 
         tv_loss = self.total_variation(adv_patch)

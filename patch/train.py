@@ -1,11 +1,14 @@
 import sys
 import os
 
+import cv2
+import torchvision.transforms
+
 if sys.base_prefix.__contains__('home/zolfi'):
     sys.path.append('/home/zolfi/AdversarialMask')
     sys.path.append('/home/zolfi/AdversarialMask/patch')
     os.environ['QT_QPA_PLATFORM'] = 'offscreen'
-    
+
 import random
 from pathlib import Path
 import pickle
@@ -17,6 +20,7 @@ from torchvision import transforms
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from PIL import Image
+from facenet_pytorch import MTCNN, InceptionResnetV1
 
 import utils
 import losses
@@ -24,13 +28,17 @@ from config import patch_config_types
 from nn_modules import LandmarkExtractor, FaceXZooProjector, TotalVariation
 from utils import load_embedder, EarlyStopping, get_patch
 
-
 import warnings
+
 warnings.simplefilter('ignore', UserWarning)
 
 global device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print('device is {}'.format(device), flush=True)
+
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+mtcnn = MTCNN(image_size=112, device=device)
+resnet = InceptionResnetV1(pretrained='vggface2').eval()
 
 
 def set_random_seed(seed_value):
@@ -68,7 +76,8 @@ class AdversarialMask:
 
         self.create_folders()
         utils.save_class_to_file(self.config, self.config.current_dir)
-        self.target_embedding = utils.get_person_embedding(self.config, self.train_no_aug_loader, self.config.celeb_lab_mapper, self.location_extractor,
+        self.target_embedding = utils.get_person_embedding(self.config, self.train_no_aug_loader,
+                                                           self.config.celeb_lab_mapper, self.location_extractor,
                                                            self.fxz_projector, self.embedders, device)
         self.best_patch = None
 
@@ -88,7 +97,8 @@ class AdversarialMask:
         adv_patch_cpu = utils.get_patch(self.config)
         optimizer = optim.Adam([adv_patch_cpu], lr=self.config.start_learning_rate, amsgrad=True)
         scheduler = self.config.scheduler_factory(optimizer)
-        early_stop = EarlyStopping(current_dir=self.config.current_dir, patience=self.config.es_patience, init_patch=adv_patch_cpu)
+        early_stop = EarlyStopping(current_dir=self.config.current_dir, patience=self.config.es_patience,
+                                   init_patch=adv_patch_cpu)
         epoch_length = len(self.train_loader)
         for epoch in range(self.config.epochs):
             train_loss = 0.0
@@ -154,6 +164,24 @@ class AdversarialMask:
 
         img_batch_applied = self.fxz_projector(img_batch, preds, adv_patch, do_aug=self.config.mask_aug)
 
+        '''
+        transform = torchvision.transforms.ToPILImage()
+
+        #mtcnn.
+
+        out = mtcnn.detect(img_batch)
+        print(out)
+
+        original = transform(img_batch[0, :, :, :].squeeze(0))
+        masked = transform(img_batch_applied[0, :, :, :].squeeze(0))
+
+        out = mtcnn.detect(img_batch)
+        print(out)
+
+        original.show()
+        masked.show()
+        '''
+
         patch_embs = {}
         for embedder_name, emb_model in self.embedders.items():
             patch_embs[embedder_name] = emb_model(img_batch_applied)
@@ -177,7 +205,8 @@ class AdversarialMask:
         final_patch_img = transforms.ToPILImage()(final_patch.squeeze(0))
         final_patch_img.save(self.config.current_dir + '/final_results/final_patch.png', 'PNG')
         new_size = tuple(self.config.magnification_ratio * s for s in self.config.img_size)
-        transforms.Resize(new_size)(final_patch_img).save(self.config.current_dir + '/final_results/final_patch_magnified.png', 'PNG')
+        transforms.Resize(new_size)(final_patch_img).save(
+            self.config.current_dir + '/final_results/final_patch_magnified.png', 'PNG')
         torch.save(self.best_patch, self.config.current_dir + '/final_results/final_patch_raw.pt')
 
         with open(self.config.current_dir + '/losses/train_losses', 'wb') as fp:
