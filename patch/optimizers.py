@@ -43,19 +43,38 @@ class SimpleSGD:
 
 
 class Adam:
+    # TODO: untested, remove this when tested
     def __init__(self, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
-        # TODO: initialize momentum
-        # TODO: consider adding validity checks
-        self.alpha = alpha
-        self.beta1 = beta1
-        self.beta2 = beta2
-        self.epsilon = epsilon
-        self.momentum = None
-        # hyperparameters = {'alpha': alpha, 'beta1': beta1, 'beta2': beta2, 'epsilon': epsilon, 'momentum': None}
-        # self.hyperparameters = hyperparameters
+
+        if alpha > 1 or alpha < 0:
+            raise ValueError("alpha must be between 0 and 1: {}".format(alpha))
+        if beta1 > 1 or beta1 < 0:
+            raise ValueError("beta1 must be between 0 and 1: {}".format(beta1))
+        if beta2 > 1 or beta2 < 0:
+            raise ValueError("beta2 must be between 0 and 1: {}".format(beta2))
+        if epsilon < 0:
+            raise ValueError("epsilon must be larger than 0: {}".format(epsilon))
+
+        else:
+            self.alpha = alpha
+            self.beta1 = beta1
+            self.beta2 = beta2
+            self.epsilon = epsilon
+            self.momentum = None
+            self.rms = None
+            self.t = 1
 
     def step(self, objective, gradient):
         if self.momentum is None:
             self.momentum = np.zeros(objective.shape())
-            # see if momentum is initialized
-        pass
+        if self.rms is None:
+            self.rms = np.zeros(objective.shape())
+
+        self.momentum = torch.add(torch.mul(self.beta1, self.momentum), torch.mul(1 - self.beta1, gradient))
+        self.rms = torch.add(torch.mul(self.beta2, self.rms), torch.mul(1 - self.beta2, torch.mul(gradient, gradient)))
+
+        momentum_corr = torch.div(self.momentum, 1 - self.beta1**self.t)
+        rms_corr = torch.div(self.rms, 1 - self.beta2**self.t)
+
+        return \
+            objective - torch.mul(self.alpha, torch.div(momentum_corr, torch.add(torch.sqrt(rms_corr), self.epsilon)))
