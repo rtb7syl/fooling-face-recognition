@@ -44,7 +44,7 @@ class SimpleSGD:
 
 class Adam:
     # TODO: untested, remove this when tested
-    def __init__(self, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
+    def __init__(self, device, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
 
         if alpha > 1 or alpha < 0:
             raise ValueError("alpha must be between 0 and 1: {}".format(alpha))
@@ -63,15 +63,16 @@ class Adam:
             self.momentum = None
             self.rms = None
             self.iteration = 1
+            self.device = device
 
     def step(self, objective, gradient):
         if self.momentum is None:
-            self.momentum = np.zeros(objective.shape())
+            self.momentum = torch.zeros(objective.size(), device=self.device)
         if self.rms is None:
-            self.rms = np.zeros(objective.shape())
+            self.rms = torch.zeros(objective.size(), device=self.device)
 
-        self.momentum = torch.add(torch.mul(self.beta1, self.momentum), torch.mul(1 - self.beta1, gradient))
-        self.rms = torch.add(torch.mul(self.beta2, self.rms), torch.mul(1 - self.beta2, torch.mul(gradient, gradient)))
+        self.momentum = torch.add(torch.mul(self.momentum, self.beta1), torch.mul(gradient, 1 - self.beta1))
+        self.rms = torch.add(torch.mul(self.rms, self.beta2), torch.mul(torch.mul(gradient, gradient), 1 - self.beta2))
 
         momentum_corr = torch.div(self.momentum, 1 - self.beta1**self.iteration)
         rms_corr = torch.div(self.rms, 1 - self.beta2**self.iteration)
@@ -79,4 +80,4 @@ class Adam:
         self.iteration += 1
 
         return \
-            objective - torch.mul(self.alpha, torch.div(momentum_corr, torch.add(torch.sqrt(rms_corr), self.epsilon)))
+            objective - torch.mul(torch.div(momentum_corr, torch.add(torch.sqrt(rms_corr), self.epsilon)), self.alpha)

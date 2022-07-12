@@ -89,7 +89,8 @@ class BaseConfiguration:
         self.initial_patch = 'white'  # body, white, random, stripes, l_stripes
         self.epochs = 100
         #self.epochs = 5
-        self.meta_lr=1e-3
+        self.meta_lr = 1e-3
+        self.meta_momentum = 0.9
         self.start_learning_rate = 1e-2
         self.es_patience = 7
         self.sc_patience = 2
