@@ -234,7 +234,7 @@ class Evaluator:
 def main():
     mode = 'universal'
     config = patch_config_types[mode]()
-    adv_mask = Image.open('/home/ca550013/Projects/fooling-face-recognition/patch/experiments/July/11-07-2022_16-09-58_28667741_sgd_lr_0.001_momentum/final_results/final_patch.png').convert('RGB')
+    adv_mask = Image.open('/home/ca550013/Projects/fooling-face-recognition/patch/experiments/July/12-07-2022_10-54-42_28679459_sgd_lr_0.001_momentum/final_results/final_patch.png').convert('RGB')
     adv_mask_t = transforms.ToTensor()(adv_mask).unsqueeze(0)
     print('Starting test...', flush=True)
     evaluator = Evaluator(config, adv_mask_t)

@@ -5,7 +5,7 @@ if sys.base_prefix.__contains__('home/zolfi'):
     sys.path.append('/home/zolfi/AdversarialMask')
     sys.path.append('/home/zolfi/AdversarialMask/patch')
     os.environ['QT_QPA_PLATFORM'] = 'offscreen'
-    
+
 import random
 from pathlib import Path
 import pickle
@@ -28,6 +28,7 @@ from optimizers import SimpleSGD
 import wandb
 
 import warnings
+
 warnings.simplefilter('ignore', UserWarning)
 
 global device
@@ -69,8 +70,7 @@ class AdversarialMask:
 
         self.dist_loss = losses.get_loss(self.config)
 
-        self.meta_optimizer=SimpleSGD(lr=self.config.meta_lr,momentum=self.config.meta_momentum,nesterov=True)
-
+        self.meta_optimizer = SimpleSGD(lr=self.config.meta_lr, momentum=self.config.meta_momentum, nesterov=True)
 
         self.train_losses_epoch = []
         self.train_losses_iter = []
@@ -80,7 +80,8 @@ class AdversarialMask:
 
         self.create_folders()
         utils.save_class_to_file(self.config, self.config.current_dir)
-        self.target_embedding = utils.get_person_embedding(self.config, self.train_no_aug_loader, self.config.celeb_lab_mapper, self.location_extractor,
+        self.target_embedding = utils.get_person_embedding(self.config, self.train_no_aug_loader,
+                                                           self.config.celeb_lab_mapper, self.location_extractor,
                                                            self.fxz_projector, self.embedders, device)
         self.best_patch = None
 
@@ -103,7 +104,8 @@ class AdversarialMask:
         adv_patch_cpu = utils.get_patch(self.config)
         optimizer = optim.Adam([adv_patch_cpu], lr=self.config.start_learning_rate, amsgrad=True)
         scheduler = self.config.scheduler_factory(optimizer)
-        early_stop = EarlyStopping(current_dir=self.config.current_dir, patience=self.config.es_patience, init_patch=adv_patch_cpu)
+        early_stop = EarlyStopping(current_dir=self.config.current_dir, patience=self.config.es_patience,
+                                   init_patch=adv_patch_cpu)
         epoch_length = len(self.train_loader)
         for epoch in range(self.config.epochs):
             train_loss = 0.0
@@ -160,11 +162,11 @@ class AdversarialMask:
         total_loss = distance_loss + tv_loss
         return total_loss, [distance_loss, tv_loss]
 
-    def loss_fn_v2(self, patch_embs,cls_id):
+    def loss_fn_v2(self, patch_embs, cls_id):
         distance_loss = torch.empty(0, device=device)
         for emb_name, patch_emb in patch_embs.items():
-            target_embedding=self.target_embedding[emb_name]
-            #print(emb_name)
+            target_embedding = self.target_embedding[emb_name]
+            # print(emb_name)
             target_embeddings = torch.index_select(target_embedding, index=cls_id, dim=0).squeeze(-2)
             distance = self.dist_loss(patch_emb, target_embeddings)
             single_embedder_dist_loss = torch.mean(distance).unsqueeze(0)
@@ -175,8 +177,8 @@ class AdversarialMask:
 
     def loss_fn_single_v2(self, patch_emb, emb_name, cls_id):
         distance_loss = torch.empty(0, device=device)
-        target_embedding=self.target_embedding[emb_name]
-        #print(emb_name)
+        target_embedding = self.target_embedding[emb_name]
+        # print(emb_name)
         target_embeddings = torch.index_select(target_embedding, index=cls_id, dim=0).squeeze(-2)
         distance = self.dist_loss(patch_emb, target_embeddings)
         single_embedder_dist_loss = torch.mean(distance).unsqueeze(0)
@@ -196,69 +198,83 @@ class AdversarialMask:
         img_batch_applied = self.fxz_projector(img_batch, preds, adv_patch, do_aug=self.config.mask_aug)
 
         n_embedders = len(list(self.embedders.items()))
-        #print('n_embedders ', n_embedders)
+        # print('n_embedders ', n_embedders)
         test_embedder_idx = random.choice(range(n_embedders))
-        #print('test_embedder_idx',test_embedder_idx)
-        test_embedder_name,test_embedder_model=list(self.embedders.items())[test_embedder_idx]
-        #print('test_embedder_name ',test_embedder_name)
-
+        # print('test_embedder_idx',test_embedder_idx)
+        test_embedder_name, test_embedder_model = list(self.embedders.items())[test_embedder_idx]
+        # print('test_embedder_name ',test_embedder_name)
 
         patch_embs = {}
         for i, (embedder_name, emb_model) in enumerate(self.embedders.items()):
-            if i!=test_embedder_idx:
-                #print(embedder_name)
+            if i != test_embedder_idx:
+                # print(embedder_name)
                 patch_embs[embedder_name] = emb_model(img_batch_applied)
 
-        #overall_loss=[]
+        # overall_loss=[]
         meta_train_loss = self.loss_fn_v2(patch_embs, cls_id)
         #print('meta_train_loss', meta_train_loss)
 
-        #overall_loss.append(meta_train_loss)
+        # overall_loss.append(meta_train_loss)
 
-        meta_test_losses=[]
+        meta_test_losses = []
         for i, (embedder_name, emb_model) in enumerate(self.embedders.items()):
 
-            #Meta-Train
-            if i!=test_embedder_idx:
+            # Meta-Train
+            if i != test_embedder_idx:
+                patch_emb = patch_embs[embedder_name]
+                tr_loss = self.loss_fn_single_v2(patch_emb, embedder_name, cls_id)
+                # print('tr_loss ',tr_loss)
+                tr_loss_grad_adv = torch.autograd.grad(tr_loss, adv_patch, retain_graph=True)[0]
 
-                patch_emb=patch_embs[embedder_name]
-                tr_loss=self.loss_fn_single_v2(patch_emb,embedder_name,cls_id)
-                #print('tr_loss ',tr_loss)
-                tr_loss_grad_adv=torch.autograd.grad(tr_loss,adv_patch,retain_graph=True)[0]
-
+<<<<<<< HEAD
                 #single step adv patch update by SGD
 
                 adv_patch_updated=self.meta_optimizer.step(adv_patch,tr_loss_grad_adv)
                 #adv_patch_updated = torch.add(adv_patch, torch.mul(tr_loss_grad_adv, -self.config.meta_lr))
+=======
+                # single step adv patch update by SGD
+                adv_patch_updated = self.meta_optimizer.step(adv_patch, tr_loss_grad_adv)
+                # adv_patch_updated = torch.add(adv_patch, torch.mul(tr_loss_grad_adv, -self.config.meta_lr))
+>>>>>>> 5b5fc84e6e2de62d2264a01d32b9e974fffd5563
                 adv_patch_updated.data.clamp_(0, 1)
 
-                #Meta test
-                img_batch_applied_test = self.fxz_projector(img_batch, preds, adv_patch_updated, do_aug=self.config.mask_aug)
-                patch_emb_test=test_embedder_model(img_batch_applied_test)
-                te_loss=self.loss_fn_single_v2(patch_emb_test,test_embedder_name,cls_id)
-                #print('te_loss ',te_loss)
+                # Meta test
+                img_batch_applied_test = self.fxz_projector(img_batch, preds, adv_patch_updated,
+                                                            do_aug=self.config.mask_aug)
+                patch_emb_test = test_embedder_model(img_batch_applied_test)
+                te_loss = self.loss_fn_single_v2(patch_emb_test, test_embedder_name, cls_id)
+                # print('te_loss ',te_loss)
                 meta_test_losses.append(te_loss)
 
+<<<<<<< HEAD
         meta_test_loss=torch.mean(torch.stack(meta_test_losses))
         #print('meta_test_loss',meta_test_loss)
+=======
+        meta_test_loss = torch.mean(torch.stack(meta_test_losses))
+        print('meta_test_loss', meta_test_loss)
+>>>>>>> 5b5fc84e6e2de62d2264a01d32b9e974fffd5563
 
-        #overall_loss.append(meta_test_loss)
+        # overall_loss.append(meta_test_loss)
 
+<<<<<<< HEAD
         total_meta_loss = self.config.dist_weight * torch.mean(torch.stack([meta_train_loss,meta_test_loss]))
         #print('total_meta_loss',total_meta_loss)
+=======
+        total_meta_loss = self.config.dist_weight * torch.mean(torch.stack([meta_train_loss, meta_test_loss]))
+        print('total_meta_loss', total_meta_loss)
+>>>>>>> 5b5fc84e6e2de62d2264a01d32b9e974fffd5563
 
         tv_loss = self.total_variation(adv_patch)
         tv_loss = self.config.tv_weight * tv_loss
 
         total_loss = total_meta_loss + tv_loss
-        loss=(total_loss,[total_meta_loss,tv_loss])
+        loss = (total_loss, [total_meta_loss, tv_loss])
 
         loss_stats = dict(total_loss=total_loss,tv_loss=tv_loss,meta_loss=total_meta_loss,meta_train_loss=meta_train_loss,meta_test_loss=meta_test_loss)
 
         wandb.log(loss_stats)
 
         return loss, [img_batch, adv_patch, img_batch_applied, patch_embs, tv_loss]
-
 
     def save_losses(self, epoch_length, train_loss, dist_loss, tv_loss):
         train_loss /= epoch_length
@@ -274,7 +290,8 @@ class AdversarialMask:
         final_patch_img = transforms.ToPILImage()(final_patch.squeeze(0))
         final_patch_img.save(self.config.current_dir + '/final_results/final_patch.png', 'PNG')
         new_size = tuple(self.config.magnification_ratio * s for s in self.config.img_size)
-        transforms.Resize(new_size)(final_patch_img).save(self.config.current_dir + '/final_results/final_patch_magnified.png', 'PNG')
+        transforms.Resize(new_size)(final_patch_img).save(
+            self.config.current_dir + '/final_results/final_patch_magnified.png', 'PNG')
         torch.save(self.best_patch, self.config.current_dir + '/final_results/final_patch_raw.pt')
 
         with open(self.config.current_dir + '/losses/train_losses', 'wb') as fp:

@@ -105,8 +105,9 @@ class BaseConfiguration:
 
         # Embedder options
         #self.train_embedder_names = ['resnet100_arcface', 'resnet100_cosface']
-        self.train_embedder_names = ['resnet100_arcface','resnet100_cosface','resnet18_cosface','resnet18_arcface']
-        self.test_embedder_names = ['resnet100_arcface','resnet100_cosface','resnet18_arcface','resnet18_cosface']
+        self.train_embedder_names = ["resnet100_arcface", "resnet50_cosface", "resnet34_cosface", "resnet18_arcface"]
+        self.test_embedder_names = ['resnet100_arcface','resnet100_cosface','resnet18_arcface','resnet18_cosface','resnet34_arcface','resnet34_cosface','resnet50_arcface','resnet50_cosface']
+
 
 
         # Loss options

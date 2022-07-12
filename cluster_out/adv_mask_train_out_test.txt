@@ -1,9 +1,7 @@
 /rwthfs/rz/cluster/home/ca550013/Projects/fooling-face-recognition
-nrg03.hpc.itc.rwth-aachen.de
-Tue Jul 12 00:27:58 CEST 2022
-00:27:58
-00:27:58
+nrg04.hpc.itc.rwth-aachen.de
+Tue Jul 12 23:15:17 CEST 2022
+23:15:17
+23:15:17
 Starting test...
 Calculating persons embeddings with mask...
-Calculating persons embeddings without mask...
-Finished test...
