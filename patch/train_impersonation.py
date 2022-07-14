@@ -56,6 +56,8 @@ class AdversarialMask:
 
         self.train_no_aug_loader, self.train_loader = utils.get_train_loaders(self.config)
 
+        self.victim_loader=utils.get_victim_loader(self.config)
+
         self.embedders = load_embedder(self.config.train_embedder_names, device)
 
         face_landmark_detector = utils.get_landmark_detector(self.config, device)
@@ -68,6 +70,7 @@ class AdversarialMask:
         self.total_variation = TotalVariation(device).to(device)
         wandb.watch(self.total_variation)
 
+        print('self.config.dist_loss_type ',self.config.dist_loss_type)
         self.dist_loss = losses.get_loss(self.config)
 
         self.meta_optimizer = SimpleSGD(lr=self.config.meta_lr, momentum=self.config.meta_momentum, nesterov=True)
@@ -80,9 +83,12 @@ class AdversarialMask:
 
         self.create_folders()
         utils.save_class_to_file(self.config, self.config.current_dir)
-        self.target_embedding = utils.get_person_embedding(self.config, self.train_no_aug_loader,
-                                                           self.config.celeb_lab_mapper, self.location_extractor,
+
+        #target embedding is the victim embedding
+        self.target_embedding = utils.get_person_embedding(self.config, self.victim_loader,
+                                                           self.config.victim_celeb_lab_mapper, self.location_extractor,
                                                            self.fxz_projector, self.embedders, device)
+        #print('self.target_embedding ',self.target_embedding)
         self.best_patch = None
 
     def create_folders(self):
@@ -99,7 +105,6 @@ class AdversarialMask:
 
     def train(self):
 
-        
 
         adv_patch_cpu = utils.get_patch(self.config)
         optimizer = optim.Adam([adv_patch_cpu], lr=self.config.start_learning_rate, amsgrad=True)
@@ -107,6 +112,7 @@ class AdversarialMask:
         early_stop = EarlyStopping(current_dir=self.config.current_dir, patience=self.config.es_patience,
                                    init_patch=adv_patch_cpu)
         epoch_length = len(self.train_loader)
+        print('self.config.epochs',self.config.epochs)
         for epoch in range(self.config.epochs):
             train_loss = 0.0
             dist_loss = 0.0
@@ -114,7 +120,12 @@ class AdversarialMask:
             progress_bar = tqdm(enumerate(self.train_loader), desc=f'Epoch {epoch}', total=epoch_length)
             prog_bar_desc = 'train-loss: {:.6}, dist-loss: {:.6}, tv-loss: {:.6}, lr: {:.6}'
             for i_batch, (img_batch, _, cls_id) in progress_bar:
-                (b_loss, sep_loss), vars = self.forward_step(img_batch, adv_patch_cpu, cls_id)
+                print('cls_id',cls_id)
+
+                victim_cls_id=torch.zeros(img_batch.size(0),dtype=torch.int32)
+                print('victim_cls_id',victim_cls_id)
+
+                (b_loss, sep_loss), vars = self.forward_step(img_batch, adv_patch_cpu,victim_cls_id)
 
                 train_loss += b_loss.item()
                 dist_loss += sep_loss[0].item()
@@ -186,6 +197,9 @@ class AdversarialMask:
         distance_loss = distance_loss.mean()
 
         return distance_loss
+
+
+
 
     def forward_step(self, img_batch, adv_patch_cpu, cls_id):
         img_batch = img_batch.to(device)
@@ -289,7 +303,7 @@ class AdversarialMask:
 
 
 def main():
-    mode = 'universal'
+    mode = 'universal_impersonation'
     config = patch_config_types[mode]()
     print('Starting train...', flush=True)
     adv_mask = AdversarialMask(config)

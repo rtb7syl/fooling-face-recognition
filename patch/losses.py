@@ -9,7 +9,16 @@ def get_loss(config):
     #     return MseReverseLoss()
     # elif config.dist_loss_type == 'L1':
     #     return L1ReverseLoss()
+    elif config.dist_loss_type=='inverse_cossim':
+        return InverseCosLoss()
 
+class InverseCosLoss(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.cos_sim = CosineSimilarity()
+
+    def forward(self, emb1, emb2):
+        return 1-((self.cos_sim(emb1, emb2) + 1) / 2)
 
 class CosLoss(nn.Module):
     def __init__(self) -> None:

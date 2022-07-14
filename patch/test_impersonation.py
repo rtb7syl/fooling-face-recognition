@@ -39,20 +39,22 @@ class Evaluator:
         self.fxz_projector = FaceXZooProjector(device, self.config.img_size, self.config.patch_size).to(device)
         self.transform = transforms.Compose([transforms.Resize(self.config.patch_size), transforms.ToTensor()])
         self.embedders = utils.load_embedder(self.config.test_embedder_names, device=device)
-        emb_loaders, self.test_loaders = utils.get_test_loaders(self.config, self.config.test_celeb_lab.keys())
+        self.test_loaders = utils.get_impersonate_test_loader(self.config, self.config.test_celeb_lab.keys())
+        self.victim_loader=utils.get_victim_loader(self.config)
 
         self.target_embedding_w_mask, self.target_embedding_wo_mask = {}, {}
-        for dataset_name, loader in emb_loaders.items():
-            self.target_embedding_w_mask[dataset_name] = utils.get_person_embedding(self.config, loader, self.config.test_celeb_lab_mapper[dataset_name], self.location_extractor,
+        for dataset_name, loader in self.test_loaders.items():
+
+            self.target_embedding_w_mask[dataset_name] = utils.get_person_embedding(self.config, self.victim_loader, self.config.victim_celeb_lab_mapper, self.location_extractor,
                                                                                     self.fxz_projector, self.embedders, device, include_others=True)
-            self.target_embedding_wo_mask[dataset_name] = utils.get_person_embedding(self.config, loader, self.config.test_celeb_lab_mapper[dataset_name], self.location_extractor,
+            self.target_embedding_wo_mask[dataset_name] = utils.get_person_embedding(self.config, self.victim_loader, self.config.victim_celeb_lab_mapper, self.location_extractor,
                                                                                      self.fxz_projector, self.embedders, device, include_others=False)
 
         self.random_mask_t = utils.load_mask(self.config, self.config.random_mask_path, device)
         self.blue_mask_t = utils.load_mask(self.config, self.config.blue_mask_path, device)
-        self.face1_mask_t = utils.load_mask(self.config, self.config.face1_mask_path, device)
-        self.face3_mask_t = utils.load_mask(self.config, self.config.face3_mask_path, device)
-        self.mask_names = ['Clean', 'Adv', 'Random', 'Blue', 'Face1', 'Face3']
+        #self.face1_mask_t = utils.load_mask(self.config, self.config.face1_mask_path, device)
+        #self.face3_mask_t = utils.load_mask(self.config, self.config.face3_mask_path, device)
+        self.mask_names = ['Clean', 'Adv', 'Random', 'Blue']
 
         Path(self.config.current_dir).mkdir(parents=True, exist_ok=True)
         utils.save_class_to_file(self.config, self.config.current_dir)
@@ -78,7 +80,11 @@ class Evaluator:
                 df_without_mask = pd.DataFrame(columns=['y_true', 'y_pred'])
                 for img_batch, img_names, cls_id in tqdm(loader):
                     img_batch = img_batch.to(device)
-                    cls_id = cls_id.to(device).type(torch.int32)
+                    
+
+                    victim_cls_id=torch.zeros(img_batch.size(0),dtype=torch.int32)
+                    print('victim_cls_id',victim_cls_id)
+                    victim_cls_id = victim_cls_id.to(device).type(torch.int32)
 
                     # Apply different types of masks
                     img_batch_applied = self.apply_all_masks(img_batch, adv_patch)
@@ -86,11 +92,11 @@ class Evaluator:
                     # Get embedding
                     all_embeddings = self.get_all_embeddings(img_batch, img_batch_applied)
 
-                    self.calc_all_similarity(all_embeddings, img_names, cls_id, 'with_mask', dataset_name)
-                    self.calc_all_similarity(all_embeddings, img_names, cls_id, 'without_mask', dataset_name)
+                    self.calc_all_similarity(all_embeddings, img_names, victim_cls_id, 'with_mask', dataset_name)
+                    self.calc_all_similarity(all_embeddings, img_names, victim_cls_id, 'without_mask', dataset_name)
 
-                    df_with_mask = df_with_mask.append(self.calc_preds(cls_id, all_embeddings, target_type='with_mask', dataset_name=dataset_name))
-                    df_without_mask = df_without_mask.append(self.calc_preds(cls_id, all_embeddings, target_type='without_mask', dataset_name=dataset_name))
+                    df_with_mask = df_with_mask.append(self.calc_preds(victim_cls_id, all_embeddings, target_type='with_mask', dataset_name=dataset_name))
+                    df_without_mask = df_without_mask.append(self.calc_preds(victim_cls_id, all_embeddings, target_type='without_mask', dataset_name=dataset_name))
 
                 Path(os.path.join(self.config.current_dir, 'saved_preds', dataset_name)).mkdir(parents=True, exist_ok=True)
                 df_with_mask.to_csv(os.path.join(self.config.current_dir, 'saved_preds', dataset_name, 'preds_with_mask.csv'), index=False)
@@ -111,12 +117,12 @@ class Evaluator:
             plt.savefig(os.path.join(self.config.current_dir, 'final_results', 'sim-boxes', dataset_name, target_type, avg_type + '_' + emb_name + '.png'))
             plt.close()
 
-    def write_similarities_to_disk(self, sims, img_names, cls_ids, sim_type, emb_name, dataset_name):
+    def write_similarities_to_disk(self, sims, img_names, sim_type, emb_name, dataset_name):
         Path(os.path.join(self.config.current_dir, 'saved_similarities', dataset_name, emb_name)).mkdir(parents=True, exist_ok=True)
         for i, lab in self.config.test_celeb_lab_mapper[dataset_name].items():
             Path(os.path.join(self.config.current_dir, 'saved_similarities', dataset_name, emb_name, lab)).mkdir(parents=True, exist_ok=True)
             for similarity, mask_name in zip(sims, self.mask_names):
-                sim = similarity[cls_ids.cpu().numpy() == i].tolist()
+                sim = similarity.tolist()
                 sim = {img_name: s for img_name, s in zip(img_names, sim)}
                 with open(os.path.join(self.config.current_dir, 'saved_similarities', dataset_name, emb_name, lab, sim_type + '_' + mask_name + '.pickle'), 'ab') as f:
                     pickle.dump(sim, f)
@@ -128,6 +134,7 @@ class Evaluator:
     def apply_all_masks(self, img_batch, adv_patch):
         img_batch_applied_adv = utils.apply_mask(self.location_extractor,
                                                  self.fxz_projector, img_batch, adv_patch)
+
         img_batch_applied_random = utils.apply_mask(self.location_extractor,
                                                     self.fxz_projector, img_batch,
                                                     self.random_mask_t)
@@ -135,6 +142,7 @@ class Evaluator:
                                                   self.fxz_projector, img_batch,
                                                   self.blue_mask_t[:, :3],
                                                   self.blue_mask_t[:, 3], is_3d=True)
+        '''
         img_batch_applied_face1 = utils.apply_mask(self.location_extractor,
                                                    self.fxz_projector, img_batch,
                                                    self.face1_mask_t[:, :3],
@@ -143,14 +151,15 @@ class Evaluator:
                                                    self.fxz_projector, img_batch,
                                                    self.face3_mask_t[:, :3],
                                                    self.face3_mask_t[:, 3], is_3d=True)
-
-        return img_batch_applied_adv, img_batch_applied_random, img_batch_applied_blue, img_batch_applied_face1, img_batch_applied_face3
+        '''
+        return img_batch_applied_adv, img_batch_applied_random, img_batch_applied_blue
 
     def get_all_embeddings(self, img_batch, img_batch_applied_masks):
         batch_embs = {}
         for emb_name, emb_model in self.embedders.items():
             batch_embs[emb_name] = [emb_model(img_batch.to(device)).cpu().numpy()]
             for img_batch_applied_mask in img_batch_applied_masks:
+                #print('img_batch_applied_mask.size()',img_batch_applied_mask.size())
                 batch_embs[emb_name].append(emb_model(img_batch_applied_mask.to(device)).cpu().numpy())
         return batch_embs
 
@@ -161,7 +170,7 @@ class Evaluator:
             sims = []
             for emb in all_embeddings[emb_name]:
                 sims.append(np.diag(cosine_similarity(emb, target_embedding)))
-            self.write_similarities_to_disk(sims, img_names, cls_id, sim_type=target_type, emb_name=emb_name, dataset_name=dataset_name)
+            self.write_similarities_to_disk(sims, img_names, sim_type=target_type, emb_name=emb_name, dataset_name=dataset_name)
 
     def get_final_similarity_from_disk(self, sim_type, dataset_name, by_person=False):
         sims = {}
@@ -180,6 +189,7 @@ class Evaluator:
                 else:
                     sims[emb_name].append([])
                     for lab in self.config.test_celeb_lab[dataset_name]:
+                        print('path ', os.path.join(self.config.current_dir, 'saved_similarities', dataset_name, emb_name, lab, sim_type + '_' + mask_name + '.pickle'))
                         with open(os.path.join(self.config.current_dir, 'saved_similarities', dataset_name, emb_name, lab, sim_type + '_' + mask_name + '.pickle'), 'rb') as f:
                             person_sims = []
                             while True:
@@ -232,9 +242,9 @@ class Evaluator:
 
 
 def main():
-    mode = 'universal'
+    mode = 'universal_impersonation'
     config = patch_config_types[mode]()
-    adv_mask = Image.open('/home/lect0083/July/11-07-2022_16-09-58_28667741_sgd_lr_0.001_momentum/final_results/final_patch.png').convert('RGB')
+    adv_mask = Image.open('/home/lect0083/July/13-07-2022_23-45-44_28703473/final_results/final_patch.png').convert('RGB')
     adv_mask_t = transforms.ToTensor()(adv_mask).unsqueeze(0)
     print('Starting test...', flush=True)
     evaluator = Evaluator(config, adv_mask_t)

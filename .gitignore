@@ -1,5 +1,6 @@
 *.pth
 patch/experiments/*
+patch/wandb/*
 data/
 cluster_out/*
 cluster_err/*

@@ -78,5 +78,4 @@ class Adam:
 
         self.iteration += 1
 
-        return \
-            objective - torch.mul(self.alpha, torch.div(momentum_corr, torch.add(torch.sqrt(rms_corr), self.epsilon)))
+        return objective - torch.mul(self.alpha, torch.div(momentum_corr, torch.add(torch.sqrt(rms_corr), self.epsilon)))
