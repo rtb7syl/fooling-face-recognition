@@ -196,13 +196,16 @@ def get_nested_dataset_files(img_dir, person_labs):
     return files_in_folder
 
 
-def get_split_indices(img_dir, celeb_lab, num_of_images):
+def get_split_indices(img_dir, celeb_lab, num_of_images,seed=None):
     dataset_nested_files = get_nested_dataset_files(img_dir, celeb_lab)
 
     nested_indices = [np.array(range(len(arr))) for i, arr in enumerate(dataset_nested_files)]
     nested_indices_continuous = [nested_indices[0]]
     for i, arr in enumerate(nested_indices[1:]):
         nested_indices_continuous.append(arr + nested_indices_continuous[i][-1] + 1)
+
+    if seed is not None:
+        np.random.seed(seed)
     train_indices = np.array([np.random.choice(arr_idx, size=num_of_images, replace=False) for arr_idx in
                         nested_indices_continuous]).ravel()
     test_indices = list(set(list(range(nested_indices_continuous[-1][-1]))) - set(train_indices))
@@ -223,7 +226,7 @@ def get_all_indices(img_dir, celeb_lab):
 
 
 def get_train_loaders(config):
-    train_indices, _ = get_split_indices(config.train_img_dir, config.celeb_lab, config.num_of_train_images)
+    train_indices, test_indices = get_split_indices(config.train_img_dir, config.celeb_lab, config.num_of_train_images,seed=config.seed)
     train_dataset_no_aug = CustomDataset1(img_dir=config.train_img_dir,
                                           celeb_lab_mapper=config.celeb_lab_mapper,
                                           img_size=config.img_size,
@@ -242,6 +245,8 @@ def get_train_loaders(config):
     train_no_aug_loader = DataLoader(train_dataset_no_aug, batch_size=config.train_batch_size)
     train_loader = DataLoader(train_dataset, batch_size=config.train_batch_size)
 
+    print('Train loader test_indices',test_indices)
+    print('Train loader len test_indices ',len(test_indices))
     return train_no_aug_loader, train_loader
 
 def get_victim_loader(config):
@@ -290,6 +295,8 @@ def get_test_loaders(config, dataset_names):
 
     return emb_loaders, test_loaders
 
+
+
 def get_impersonate_test_loader(config, dataset_names):
     test_loaders = {}
     for dataset_name in dataset_names:
@@ -300,10 +307,10 @@ def get_impersonate_test_loader(config, dataset_names):
         elif config.patch_name=="targeted_impersonation":
             _, test_indices = get_split_indices(config.test_img_dir[dataset_name],
                                                       config.test_celeb_lab[dataset_name],
-                                                      config.num_of_train_images)
+                                                      config.num_of_train_images,seed=config.seed)
 
-        #print('test_indices',test_indices)
-        print('len test_indices ',len(test_indices))
+        print('Test loader test_indices',test_indices)
+        print('Test loader len test_indices ',len(test_indices))
 
         test_dataset = CustomDataset1(img_dir=config.test_img_dir[dataset_name],
                                       celeb_lab_mapper=config.test_celeb_lab_mapper[dataset_name],
@@ -326,7 +333,6 @@ def get_person_embedding(config, loader, celeb_lab, location_extractor, fxz_proj
         person_embeddings = {i: torch.empty(0, device=device) for i in range(len(celeb_lab))}
         masks_path = [config.blue_mask_path, config.black_mask_path, config.white_mask_path]
         for img_batch, _, person_indices in tqdm(loader):
-            print('person_indices',person_indices)
             img_batch = img_batch.to(device)
             if include_others:
                 mask_path = masks_path[random.randint(0, 2)]

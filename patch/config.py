@@ -176,32 +176,42 @@ class TargetedAttack(BaseConfiguration):
         self.test_celeb_lab_mapper = {self.train_dataset_name: self.celeb_lab_mapper}
 
 class UniversalImpersonationAttack(BaseConfiguration):
-    def __init__(self,victim_id=None):
+    def __init__(self,victim_id=None,lab=None):
         super(UniversalImpersonationAttack,self).__init__()
 
         self.patch_name="universal_impersonation"
-        self.victim_id=self.train_number_of_people if victim_id is None else victim_id
-        self.victim_celeb_lab = [os.listdir(self.train_img_dir)[self.victim_id]]
+        self.train_number_of_people = 100
+
+        if lab is None:
+            self.victim_id=self.train_number_of_people if victim_id is None else victim_id
+            lab = os.listdir(self.train_img_dir)[self.victim_id]
+            print('lab', lab)
+
+        self.victim_celeb_lab = [lab]
+            
         print('victim_celeb_lab ',self.victim_celeb_lab)
         self.victim_celeb_lab_mapper = {i: lab for i, lab in enumerate(self.victim_celeb_lab)}
         print('victim_celeb_lab_mapper ',self.victim_celeb_lab_mapper)
         self.num_of_victim_images=10
         self.dist_loss_type="inverse_cossim"
-        self.tv_weight = 0.2
+        self.tv_weight = 0.1
+
+        
 
         #self.test_embedder_names = ['resnet34_arcface']
 
         self.test_batch_size = 32
         self.test_dataset_names = ['CASIA-WebFace_aligned']
         self.test_img_dir = {name: os.path.join('/home','lect0083','datasets', name) for name in self.test_dataset_names}
-        self.test_number_of_people = 200
+        self.test_number_of_people = 201
+
         self.test_celeb_lab = {}
         for dataset_name, img_dir in self.test_img_dir.items():
             label_list = os.listdir(img_dir)[:self.test_number_of_people]
             if dataset_name == self.train_dataset_name:
                 label_list = os.listdir(img_dir)[-self.test_number_of_people:]
-                if self.victim_celeb_lab in label_list:
-                    label_list.remove(self.victim_celeb_lab)
+                if self.victim_celeb_lab[0] in label_list:
+                    label_list.remove(self.victim_celeb_lab[0])
             self.test_celeb_lab[dataset_name] = label_list
         self.test_celeb_lab_mapper = {dataset_name: {i: lab for i, lab in enumerate(self.test_celeb_lab[dataset_name])}
                                       for dataset_name in self.test_dataset_names}

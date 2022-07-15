@@ -56,6 +56,7 @@ class AdversarialMask:
 
         self.train_no_aug_loader, self.train_loader = utils.get_train_loaders(self.config)
 
+
         self.victim_loader=utils.get_victim_loader(self.config)
 
         self.embedders = load_embedder(self.config.train_embedder_names, device)
@@ -104,7 +105,6 @@ class AdversarialMask:
         Path(self.config.current_dir + '/losses').mkdir(parents=True, exist_ok=True)
 
     def train(self):
-
 
         adv_patch_cpu = utils.get_patch(self.config)
         optimizer = optim.Adam([adv_patch_cpu], lr=self.config.start_learning_rate, amsgrad=True)
@@ -304,7 +304,7 @@ class AdversarialMask:
 
 def main():
     mode = 'universal_impersonation'
-    config = patch_config_types[mode]()
+    config = patch_config_types[mode](lab='1548757')
     print('Starting train...', flush=True)
     adv_mask = AdversarialMask(config)
     adv_mask.train()

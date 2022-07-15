@@ -243,8 +243,8 @@ class Evaluator:
 
 def main():
     mode = 'universal_impersonation'
-    config = patch_config_types[mode]()
-    adv_mask = Image.open('/home/lect0083/July/13-07-2022_23-45-44_28703473/final_results/final_patch.png').convert('RGB')
+    config = patch_config_types[mode](lab='1548757')
+    adv_mask = Image.open('/home/ca550013/Projects/fooling-face-recognition/patch/experiments/July/14-07-2022_22-58-18_28715727/final_results/final_patch.png').convert('RGB')
     adv_mask_t = transforms.ToTensor()(adv_mask).unsqueeze(0)
     print('Starting test...', flush=True)
     evaluator = Evaluator(config, adv_mask_t)
