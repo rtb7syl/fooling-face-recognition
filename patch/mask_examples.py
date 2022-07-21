@@ -39,7 +39,7 @@ def apply_mask_to_imgs(datapath,save_path,maskpath):
             transforms.ToPILImage()(applied[0].cpu()).save(os.path.join(save_idpath, img_name))
 
 if __name__ =="__main__":
-    datapath='/home/lect0083/data/Umdfaces_subset_100_ids_test'
-    save_path='/home/lect0083/data/Umdfaces_subset_100_ids_test_masked'
+    datapath='/home/ca550013/Projects/deep-learning-lab/data/our_faces_aligned/test'
+    save_path='/home/ca550013/Projects/deep-learning-lab/data/our_faces_aligned/test_masked'
     maskpath='/home/lect0083/July/12-07-2022_15-50-42_28685121_sgd_lr_0.001_momentum/final_results/final_patch.png'
     apply_mask_to_imgs(datapath,save_path,maskpath)

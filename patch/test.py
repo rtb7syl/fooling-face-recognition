@@ -48,11 +48,11 @@ class Evaluator:
             self.target_embedding_wo_mask[dataset_name] = utils.get_person_embedding(self.config, loader, self.config.test_celeb_lab_mapper[dataset_name], self.location_extractor,
                                                                                      self.fxz_projector, self.embedders, device, include_others=False)
 
-        self.random_mask_t = utils.load_mask(self.config, self.config.random_mask_path, device)
+        #self.random_mask_t = utils.load_mask(self.config, self.config.random_mask_path, device)
         self.blue_mask_t = utils.load_mask(self.config, self.config.blue_mask_path, device)
-        self.face1_mask_t = utils.load_mask(self.config, self.config.face1_mask_path, device)
-        self.face3_mask_t = utils.load_mask(self.config, self.config.face3_mask_path, device)
-        self.mask_names = ['Clean', 'Adv', 'Random', 'Blue', 'Face1', 'Face3']
+        #self.face1_mask_t = utils.load_mask(self.config, self.config.face1_mask_path, device)
+        #self.face3_mask_t = utils.load_mask(self.config, self.config.face3_mask_path, device)
+        self.mask_names = ['Clean', 'Adv', 'Blue']
 
         Path(self.config.current_dir).mkdir(parents=True, exist_ok=True)
         utils.save_class_to_file(self.config, self.config.current_dir)
@@ -128,13 +128,15 @@ class Evaluator:
     def apply_all_masks(self, img_batch, adv_patch):
         img_batch_applied_adv = utils.apply_mask(self.location_extractor,
                                                  self.fxz_projector, img_batch, adv_patch)
-        img_batch_applied_random = utils.apply_mask(self.location_extractor,
-                                                    self.fxz_projector, img_batch,
-                                                    self.random_mask_t)
         img_batch_applied_blue = utils.apply_mask(self.location_extractor,
                                                   self.fxz_projector, img_batch,
                                                   self.blue_mask_t[:, :3],
                                                   self.blue_mask_t[:, 3], is_3d=True)
+        '''
+        img_batch_applied_random = utils.apply_mask(self.location_extractor,
+                                                    self.fxz_projector, img_batch,
+                                                    self.random_mask_t)
+
         img_batch_applied_face1 = utils.apply_mask(self.location_extractor,
                                                    self.fxz_projector, img_batch,
                                                    self.face1_mask_t[:, :3],
@@ -143,8 +145,9 @@ class Evaluator:
                                                    self.fxz_projector, img_batch,
                                                    self.face3_mask_t[:, :3],
                                                    self.face3_mask_t[:, 3], is_3d=True)
+        '''
 
-        return img_batch_applied_adv, img_batch_applied_random, img_batch_applied_blue, img_batch_applied_face1, img_batch_applied_face3
+        return img_batch_applied_adv, img_batch_applied_blue
 
     def get_all_embeddings(self, img_batch, img_batch_applied_masks):
         batch_embs = {}
@@ -234,7 +237,7 @@ class Evaluator:
 def main():
     mode = 'universal'
     config = patch_config_types[mode]()
-    adv_mask = Image.open('/home/lect0083/July/11-07-2022_16-09-58_28667741_sgd_lr_0.001_momentum/final_results/final_patch.png').convert('RGB')
+    adv_mask = Image.open('/home/lect0083/July/12-07-2022_15-50-42_28685121_sgd_lr_0.001_momentum/final_results/final_patch.png').convert('RGB')
     adv_mask_t = transforms.ToTensor()(adv_mask).unsqueeze(0)
     print('Starting test...', flush=True)
     evaluator = Evaluator(config, adv_mask_t)

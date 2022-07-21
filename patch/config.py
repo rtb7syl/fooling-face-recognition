@@ -70,7 +70,8 @@ class BaseConfiguration:
         # Train dataset options
         self.is_real_person = False
         self.train_dataset_name = 'CASIA-WebFace_aligned'
-        self.train_img_dir = os.path.join('/home','lect0083','datasets', self.train_dataset_name)
+        self.train_img_dir = os.path.join('/home','lect0083','datasets', 'CASIA-WebFace_aligned')
+        #self.train_img_dir = os.path.join('/home','lect0083','data', self.train_dataset_name, 'images')
         #self.train_img_dir = os.path.join('..','..', 'data', self.train_dataset_name)
         self.train_number_of_people = 100
         self.celeb_lab = os.listdir(self.train_img_dir)[:self.train_number_of_people]
@@ -148,9 +149,12 @@ class UniversalAttack(BaseConfiguration):
 
         # Test dataset options
         self.test_num_of_images_for_emb = 5
-        self.test_dataset_names = ['CASIA-WebFace_aligned']
-        #self.test_img_dir = {name: os.path.join('..', '..','data', name) for name in self.test_dataset_names}
-        self.test_img_dir = {name: os.path.join('/home','lect0083','datasets', name) for name in self.test_dataset_names}
+        #self.test_dataset_names = ['CASIA-WebFace_aligned','Umdfaces']
+        self.test_dataset_names = ['Umdfaces']
+        #self.test_dataset_paths = [os.path.join('/home','lect0083','datasets', 'CASIA-WebFace_aligned'), os.path.join('/home','lect0083','data', 'Umdfaces', 'images')]
+        self.test_img_dir = {name: os.path.join('/home','lect0083','data', 'Umdfaces', 'images') for name in self.test_dataset_names}
+        #self.test_img_dir = {name: path for name, path in zip(self.test_dataset_names,self.test_dataset_paths)}
+        print('self.test_img_dir',self.test_img_dir)
         self.test_number_of_people = 200
         self.test_celeb_lab = {}
         for dataset_name, img_dir in self.test_img_dir.items():
@@ -180,36 +184,49 @@ class UniversalImpersonationAttack(BaseConfiguration):
         super(UniversalImpersonationAttack,self).__init__()
 
         self.patch_name="universal_impersonation"
-        self.train_number_of_people = 100
+
+        self.train_dataset_name = 'our_faces_and_Umdfaces_subset_100_ids_train'
+        #self.train_img_dir='/home/ca550013/Projects/deep-learning-lab/data/our_faces_aligned/train'
+        self.train_img_dir = os.path.join('/home','ca550013','Projects', 'deep-learning-lab', 'data', self.train_dataset_name)
+
+        self.train_number_of_people = 102
+
+        self.num_of_train_images = 5
+        print('lab ', lab)
 
         if lab is None:
             self.victim_id=self.train_number_of_people if victim_id is None else victim_id
             lab = os.listdir(self.train_img_dir)[self.victim_id]
             print('lab', lab)
 
+        self.celeb_lab = os.listdir(self.train_img_dir)
+        self.celeb_lab.remove(lab)
+        print('self.celeb_lab ',self.celeb_lab)
+        self.celeb_lab_mapper = {i: lab for i, lab in enumerate(self.celeb_lab)}
+
         self.victim_celeb_lab = [lab]
             
         print('victim_celeb_lab ',self.victim_celeb_lab)
         self.victim_celeb_lab_mapper = {i: lab for i, lab in enumerate(self.victim_celeb_lab)}
         print('victim_celeb_lab_mapper ',self.victim_celeb_lab_mapper)
-        self.num_of_victim_images=10
+        self.num_of_victim_images=20
+
         self.dist_loss_type="inverse_cossim"
         self.tv_weight = 0.1
-
-        
 
         #self.test_embedder_names = ['resnet34_arcface']
 
         self.test_batch_size = 32
-        self.test_dataset_names = ['CASIA-WebFace_aligned']
-        self.test_img_dir = {name: os.path.join('/home','lect0083','datasets', name) for name in self.test_dataset_names}
-        self.test_number_of_people = 201
+        self.test_dataset_names = ['our_faces_aligned']
+        self.test_img_dir = {name: os.path.join('/home','ca550013','Projects', 'deep-learning-lab', 'data', name, 'test') for name in self.test_dataset_names}
+        self.test_number_of_people = 2
 
         self.test_celeb_lab = {}
         for dataset_name, img_dir in self.test_img_dir.items():
-            label_list = os.listdir(img_dir)[:self.test_number_of_people]
+            #label_list = os.listdir(img_dir)[:self.test_number_of_people]
+            label_list = os.listdir(img_dir)
             if dataset_name == self.train_dataset_name:
-                label_list = os.listdir(img_dir)[-self.test_number_of_people:]
+                #label_list = os.listdir(img_dir)[-self.test_number_of_people:]
                 if self.victim_celeb_lab[0] in label_list:
                     label_list.remove(self.victim_celeb_lab[0])
             self.test_celeb_lab[dataset_name] = label_list

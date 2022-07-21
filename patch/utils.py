@@ -370,6 +370,11 @@ def get_patch(config):
     patch.requires_grad_(True)
     return patch
 
+def patch_img_from_tensor(patch):
+    alpha = transforms.ToTensor()(Image.open('../prnet/new_uv.png').convert('L'))
+    patch_img = torch.cat([patch.squeeze(0), alpha])
+    patch_img = transforms.ToPILImage()(patch_img.squeeze(0))
+    return patch_img
 
 def plot_train_val_loss(config, loss, loss_type):
     xticks = [x + 1 for x in range(len(loss))]

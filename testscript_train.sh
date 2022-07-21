@@ -19,4 +19,4 @@ timestamp # print another timestamp
 conda activate tf_gpu
 cd patch
 ###### THIS IS THE REAL CODE 
-python test.py
+python train_impersonation.py

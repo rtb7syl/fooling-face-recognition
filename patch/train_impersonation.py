@@ -11,6 +11,7 @@ from pathlib import Path
 import pickle
 
 import torch
+import torchvision
 import numpy as np
 from tqdm import tqdm
 from torchvision import transforms
@@ -104,9 +105,14 @@ class AdversarialMask:
         Path(self.config.current_dir + '/saved_similarities').mkdir(parents=True, exist_ok=True)
         Path(self.config.current_dir + '/losses').mkdir(parents=True, exist_ok=True)
 
+
+
     def train(self):
 
         adv_patch_cpu = utils.get_patch(self.config)
+        #wandb.log({'adv_mask':wandb.Image(adv_patch_cpu.squeeze(0))})
+        #wandb.log({'adv_mask':[utils.patch_img_from_tensor(adv_patch_cpu)]})
+
         optimizer = optim.Adam([adv_patch_cpu], lr=self.config.start_learning_rate, amsgrad=True)
         scheduler = self.config.scheduler_factory(optimizer)
         early_stop = EarlyStopping(current_dir=self.config.current_dir, patience=self.config.es_patience,
@@ -136,6 +142,7 @@ class AdversarialMask:
                 optimizer.step()
 
                 adv_patch_cpu.data.clamp_(0, 1)
+                #wandb.log({'adv_mask':wandb.Image(adv_patch_cpu.squeeze(0))})
 
                 progress_bar.set_postfix_str(prog_bar_desc.format(train_loss / (i_batch + 1),
                                                                   dist_loss / (i_batch + 1),
@@ -283,9 +290,13 @@ class AdversarialMask:
         self.tv_losses.append(tv_loss)
 
     def save_final_objects(self):
+
+        '''
         alpha = transforms.ToTensor()(Image.open('../prnet/new_uv.png').convert('L'))
         final_patch = torch.cat([self.best_patch.squeeze(0), alpha])
         final_patch_img = transforms.ToPILImage()(final_patch.squeeze(0))
+        '''
+        final_patch_img=utils.patch_img_from_tensor(self.best_patch)
         final_patch_img.save(self.config.current_dir + '/final_results/final_patch.png', 'PNG')
         new_size = tuple(self.config.magnification_ratio * s for s in self.config.img_size)
         transforms.Resize(new_size)(final_patch_img).save(
@@ -304,7 +315,8 @@ class AdversarialMask:
 
 def main():
     mode = 'universal_impersonation'
-    config = patch_config_types[mode](lab='1548757')
+    config = patch_config_types[mode](lab='erhard')
+    #lab=1548757
     print('Starting train...', flush=True)
     adv_mask = AdversarialMask(config)
     adv_mask.train()
